@@ -1,0 +1,111 @@
+% TeX file "boundary_kernels"
+
+% Research Module in Econometrics & Statistics 
+% Prof. Dr. Liebl & Dr. Christopher Walsh
+% Winter 2021/22, M.Sc. Economics, Bonn University
+% Xingyu Tao, Xuan Li, Sven Jacobs
+
+
+\section{Boundary kernels} \label{sec:boundary_kernels}
+
+Before the boundary-adaptivity of local linear regression had been uncovered, the classical approach to compensate the boundary effects was to apply special boundary kernels for estimation in the boundary region.
+The usage of such kernels provides an asymptotic correction for the boundary bias,
+i.e.\ the order of the asymptotic bias will be $\bigO(h^2)$ near the boundary as in the interior.
+
+To understand the definition of a boundary kernel, we recall that the $\bigO(h)$ boundary bias in Theorem~\ref{theorem_3} resulted
+because the truncated kernel moment $\tilde{\kappa}_1(K) = \int_{0}^{\infty} u K(u) \diff u$ does not vanish.
+The problem for an arbitrary boundary point can be stated in the boundary framework from Section~\ref{subsec:theoretical_comparison},
+where $\supp(K) = [-1, 1]$, $\supp(f) = [0, 1]$ and the boundary region is $[0, h) \cup (1-h, 1]$.  
+Then, for a left boundary point $\int_{-\rho}^{1} u K(u) \diff u \neq 0$ causes the worse order.
+A boundary kernel is then an asymmetrically supported kernel that restores the original moment properties \parencite{Gasser_1979}. 
+Thus, for $x = \rho h$ a left boundary kernel $K_{\text{l}}(u, \rho)$ satisfies for $\rho \in [0, 1]$
+\begin{equation}
+	\int_{-\rho}^{1} u^j K_{\text{l}}(u, \rho) \diff u = \begin{cases} 
+		1 & j = 0 \\
+		0 & j = 1 \\
+		\neq 0 & j = 2 
+	\end{cases} \,.
+\end{equation}
+Notice that the kernel shape changes with the relative location of $x$ to the boundary, expressed through the parameter $\rho$. 
+
+\textcite[Table 1]{Müller_1991} derived a boundary kernel that can be seen as a continuation of the Epanechnikov kernel onto the boundary.
+The left-sided kernel is given for $\rho \in [0, 1]$ by
+\begin{align}
+	K_{\text{E,\,l}}(u, \rho) = \begin{cases}
+		6 (1-u) (\rho + u) \frac{1}{(1+\rho)^3} \left\{ 1 + 5\left( \frac{1-\rho}{1+\rho} \right)^2 - 10\frac{1-\rho}{(1+\rho)^2} u \right\} & \text{if } u \in [-\rho, 1] \\
+		0 & \text{else}
+	\end{cases} \,. 
+\end{align}
+The equivalent for the upper boundary is obtained by $K_{\text{E,\,r}}(u, \rho) = K_{\text{E,\,l}}(-u, \rho)$.
+Figure~\ref{fig:epanechnikov_boundary} plots these kernels for selected values of $\rho$.
+For the special case $\rho = 1$ the boundary kernel agrees with the interior kernel,
+and estimation at the boundaries is included as $\rho = 0$.
+The figure illustrates that the kernel shape differs the more (i.e.\ a larger portion of negative weights is assigned),
+the closer the evaluation point $x$ is to the boundary.
+The way how boundary kernels work in practice is the same as for the effective kernel of local linear regression at the boundary in Figure~\ref{fig:effective_kernel_boundary}.
+In fact, theoretical results suggest that the local linear estimator implicitly induces a boundary kernel-type bias correction \parencite{Ruppert_1994}.
+\begin{figure}
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}
+			[
+			grid, grid style={white}, 
+			samples=1000, 
+			domain=-1:1, 
+			xlabel=$u$,
+			ylabel={$K_{\text{E,\,l}}(u, \rho)$},
+			legend entries={$\rho = 1$, $\rho = 0.5$, $\rho = 0$},
+			legend style={draw=none, font=\footnotesize}, legend cell align={left}, legend pos={north west},
+			width=0.45\textwidth
+			]
+			
+			\addplot[black]
+			expression {epa_right(-x, 1)};
+			
+			\addplot[black, dashed]
+			expression {epa_right(-x, 0.5)};
+			
+			\addplot[black, dotted]
+			expression {epa_right(-x, 0)};
+		\end{axis}
+	\end{tikzpicture}
+	\qquad
+	\begin{tikzpicture}
+		\begin{axis}
+			[
+			grid, grid style={white}, 
+			samples=1000, 
+			domain=-1:1, 
+			xlabel=$u$,
+			ylabel={$K_{\text{E,\,r}}(u, \rho)$},
+			legend entries={$\rho = 1$, $\rho = 0.5$, $\rho = 0$},
+			legend style={draw=none, font=\footnotesize}, legend cell align={left},
+			width=0.45\textwidth
+			]
+			
+			\addplot[black]
+			expression {epa_right(x, 1)};
+			
+			\addplot[black, dashed]
+			expression {epa_right(x, 0.5)};
+			
+			\addplot[black, dotted]
+			expression {epa_right(x, 0)};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Left- and right-sided Epanechnikov boundary kernels for different values of $\rho$}
+	\label{fig:epanechnikov_boundary}
+\end{figure}
+
+Applying the boundary-adjusted Nadaraya-Watson estimator with the Epanechnikov boundary kernels to the simulated data from Figure~\ref{fig:nw},
+we find that the explicit adjustment corrects for a substantial amount of the original boundary bias (see Figure~\ref{fig:nw_boundary_adjusted}).
+However, performance is slightly worse than the local linear fit.
+Figure~\ref{fig:effective_kernel_nw_boundary} reveals why.
+Since \textcite{Müller_1991} required continuity at the endpoints of the boundary kernels (\enquote{smooth optimum boundary kernels}),
+the closest observations to $x = 0$ receive considerably less weight compared to the local linear estimator.
+A class of boundary kernels with greater asymptotic efficiency at the cost of discontinuity is given in \textcite{Müller_1994}.
+
+\begin{remark}
+	Local bandwidth choice is now much more involved since for each $\rho$ a different bias-variance trade-off arises
+	(e.g.\ \cite[Section 4]{Müller_1991}).
+\end{remark}

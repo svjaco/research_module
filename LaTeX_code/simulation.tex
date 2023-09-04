@@ -1,0 +1,295 @@
+% TeX file "simulation"
+
+% Research Module in Econometrics & Statistics 
+% Prof. Dr. Liebl & Dr. Christopher Walsh
+% Winter 2021/22, M.Sc. Economics, Bonn University
+% Xingyu Tao, Xuan Li, Sven Jacobs
+
+
+\section{Simulation} \label{sec:simulation}
+
+Our analysis of the estimators and their behavior near boundaries so far has been mainly based on asymptotic theory.
+Thus, the correction of boundary kernels is only approximate for finite sample sizes.
+For local linear regression we have shown the exact first-order bias correction, but the variability remains to be investigated.
+To assess the finite sample properties of the estimators, we conduct a Monte-Carlo simulation study.
+We first describe the set-up of the simulation.
+Afterwards we present and discuss the results. 
+
+\subsection{Set-up}
+
+The kernel we are using is the Epanechnikov kernel.
+Two reasons support this choice.
+First, the kernel is asymptotically optimal for the estimation in the interior (see Appendix~\hyperref[appendix_2]{2}).
+Second, its compact support on $[-1, 1]$ leads to faster computations and well-defined boundary regions.
+The optimal kernel for the boundary region is the Triangular kernel \parencite{Cheng_1997}.
+However, the efficiency loss of using the Epanechnikov kernel instead is negligible \parencite[684]{Hansen_2022}.
+For the boundary-adjusted Nadaraya-Watson estimator we apply the Epanechnikov boundary kernels from Section~\ref{sec:boundary_kernels}.
+As apparent from our theoretical analysis, the choice of the smoothing parameter $h$ is much more important.
+Practical bandwidth selection is a broad topic on its own with several proposed procedures including, for example,
+plug-in techniques and rules of thumb.
+A popular approach, we use for the application in Section~\ref{sec:application}, is based on cross-validation.
+The interested reader can find a detailed discussion of bandwidth selection in \textcite[Sections 3, 5.8]{Wand_1995}.
+For the simulation we directly employ the asymptotically optimal global bandwidths from Theorem~\ref{theorem_2}.
+We do not consider local selection due to the additional noise, its complexity for boundary points and complicated boundary regions that may arise.
+
+Table~\ref{tab:simulation_overview} presents the six cases chosen for the simulation study.
+We consider three regression functions whose graphs are shown in Figure~\ref{fig:simulation_functions}.
+The function $m_1$ was used for simulating the data in the previous sections.
+Function $m_2$ is a linear function with a peak in the interior, representing a linear boundary.
+Function $m_3$ is similar to $m_2$, but the peak is shifted to lie approximately at the left boundary zero, representing a structured boundary.
+In general, the regressor $X$ is taken to be uniformly distributed on $[0, 1]$ and
+the error to be homoscedastic with distribution $\epsilon \sim \mathcal{N}(0, 0.25^2)$.
+To study the performance of the estimators in a lower and higher signal-to-noise environment,
+we modify the error variance when estimating $m_1$.
+Lastly, we also look at the case of a non-uniform design as expressed by the design density $f_{\ast}$.
+Figure~\ref{fig:clustered_design_density} reveals that $f_{\ast}$ reflects a clustered design, where fewer observations occur closer to the boundaries.
+
+\renewcommand{\arraystretch}{1.5}	
+\begin{table} \small
+	\centering
+	\captionabove{Selected cases for the simulation study}
+	\label{tab:simulation_overview}
+	\begin{tabular}{l l c l}  
+		\toprule
+		Regression function $m$ & Design & $\sigma^2(X)$ & Feature \\
+		\midrule
+		$m_1(x) = \sin(2 \pi x)$ 							  				 & $X \sim \mathcal{U}(0, 1)$ & $0.25^2$ & Example from Figure~\ref{fig:nw} \\
+		$m_1(x) = \sin(2 \pi x)$ 							   				 & $X \sim \mathcal{U}(0, 1)$ & $0.10^2$ & High signal-to-noise ratio \\
+		$m_1(x) = \sin(2 \pi x)$ 							   				 & $X \sim \mathcal{U}(0, 1)$ & $0.50^2$ & Low signal-to-noise ratio \\
+		$m_1(x) = \sin(2 \pi x)$ 							                 & $X \sim f_{\ast}$ 		  & $0.25^2$ & Clustered (non-uniform) design \\
+		$m_2(x) = 2 -2x + 2 \exp \left\{ \frac{-(x - 0.5)^2}{0.01} \right\}$ & $X \sim \mathcal{U}(0, 1)$ & $0.25^2$ & Linear function, peak in interior \\
+		$m_3(x) = 2 -2x + 2 \exp \left\{ \frac{-(x - 0)^2}{0.01} \right\}$   & $X \sim \mathcal{U}(0, 1)$ & $0.25^2$ & Linear function, peak at boundary \\           
+		\bottomrule \addlinespace[1ex]
+		\multicolumn{4}{l}{$f_{\ast}(x) = 3 \cdot \{ 5/12 - (x - 0.5)^2 \}_{[0, \, 1]}$} 
+	\end{tabular}	
+\end{table}
+\renewcommand{\arraystretch}{1.0}
+
+The goodness-of-fit measure to evaluate the boundary behavior is the mean integrated squared error (MISE) over the left boundary region of the Nadaraya-Watson estimator,
+i.e.\ $[0, h_{\text{opt}}^{\NW}(n))$.
+For each of the six simulation cases we compute for seven representative sample sizes (from $n = 50$ to $n = 5000$) the percentage changes in the boundary MISE of the local linear estimator
+and the boundary-adjusted Nadaraya-Watson estimator to the standard Nadaraya-Watson estimator.
+Figure~\ref{fig:simulation_set-up} illustrates the main part of the procedure for the function $m_1$ and a sample size of $n = 100$.
+The optimal bandwidth in this example is $h_{\text{opt}}^{\NW}(100) = 0.104$, giving the yellow-shaded boundary region.
+The dark yellow area then reflects the integrated error of the unadjusted Nadaraya-Watson fit over the region of interest for a single random sample.
+To obtain the MISE, we proceed as follows.
+For $B$ Monte-Carlo repetitions with $n$ random observations,
+we use numerical integration to calculate the integrated squared error (ISE).
+Then, the expectation is approximated according to the law of large numbers by taking the average of the $B$ many ISE realizations:
+\begin{equation}
+	\MISE(n; \hat{m}) \approx \frac{1}{B} \sum_{j = 1}^{B} \ISE_j(n; \hat{m}) \,.
+\end{equation}
+The number of Monte-Carlo iterations equals $B = 10000$ for the first four sample sizes including $n = 500$ and $B = 1000$ otherwise.
+
+The simulation study was conducted in $\mathsf{R}$. \nocite{R_2021}
+All methods are self-implemented.
+
+\subsection{Results and discussion}
+
+We begin with the first case from Table~\ref{tab:simulation_overview}.
+The simulation results are displayed in Table~\ref{tab:simulation_results_m_1}a.
+We discuss this baseline case in greater detail since it reveals certain general patterns.
+We note that for uniform designs (here on [0, 1]) the bandwidths for the Nadaraya-Watson (NW) and the local linear (LL) estimator coincide,
+because then the asymptotic bias is the same (design bias is absent).
+We see that the bandwidth gets smaller yet the effective sample size grows (from $nh = 5.95$ to $nh = 235$).
+For $n = 50$ the left boundary region is about one tenth of the observation interval.
+For this sample size the NW estimator performs best at the left boundary.
+The MISE of the LL estimator is 789\% larger, for the boundary-adjusted NW estimator it is even 1578\%.
+However, one should keep in mind that the absolute numbers are quite small.
+From the sample size $n = 100$, LL regression yields a lower MISE, and the improvement increases with the sample size.
+For $n = 5000$ the reduction amounts to 89\%.
+In contrast, the application of boundary kernels pays off starting from a sample size of $n = 1000$.
+Thereafter, the percentage reduction approaches the numbers achieved by LL regression.
+For $n = 5000$ the reduction in the MISE amounts to 85\%.
+Besides, we notice one unusual result for the adjusted NW estimator, namely a jump in the MISE change for 250 observations.
+In summary, the simulated values show three developments.
+First, LL regression quickly leads to improved boundary behavior which grows steadily.
+Second, for smaller sample sizes the explicit boundary adjustment performs worse but achieves a lower MISE for larger samples.
+And third, the larger the sample size the smaller is the gap between the two boundary correction methods.    
+
+\begin{table}
+	\centering
+	\captionabove{Simulated percentage changes in the boundary MISE.
+				  The regression function is $m_1$ (Subtables (a)--(d) correspond to cases one to four from Table~\ref{tab:simulation_overview}).}
+	\label{tab:simulation_results_m_1}
+	\begin{tabular}{r r r r}
+		\toprule
+		\multirow{2}[1]{*}{$n$} & \multirow{2}[1]{*}{Boundary region: $[0, h_{\text{opt}}^{\NW}(n))$} & \multicolumn{2}{c}{Change in MISE to NW [\%]} \\
+		\cmidrule(lr){3-4} 
+		& & Local linear & NW boundary-adjusted \\
+		\midrule \addlinespace[2ex]
+		\multicolumn{4}{c}{(a) $X \sim \mathcal{U}(0, 1)$, $\sigma^2(X) = 0.25^2$} \\[1ex]
+		50   & [0, 0.119) & 	 789.29 & 	  1578.07 \\
+		100  & [0, 0.104) & \redm 41.90 & 	  1143.28 \\
+		250  & [0, 0.086) & \redm 65.13 & 	  1982.67 \\
+		500  & [0, 0.075) & \redm 72.98 &   	14.92 \\
+		1000 & [0, 0.065) & \redm 77.75 & \redm 65.84 \\
+		2500 & [0, 0.055) & \redm 84.48 & \redm 77.33 \\
+		5000 & [0, 0.047) & \redm 89.10 & \redm 84.82 \\[1ex]
+		\multicolumn{4}{c}{(b) $X \sim \mathcal{U}(0, 1)$, $\sigma^2(X) = 0.10^2$} \\[1ex]
+		50   & [0, 0.083) & 	1108.76 & 	  2782.59 \\
+		100  & [0, 0.072) &  	 829.54 & 	  2651.04 \\
+		250  & [0, 0.060) & \redm 82.21 & 	   660.80 \\
+		500  & [0, 0.052) & \redm 86.45 & 	  1404.17 \\
+		1000 & [0, 0.045) & \redm 88.91 & \redm 71.03 \\
+		2500 & [0, 0.038) & \redm 92.47 & \redm 85.65 \\
+		5000 & [0, 0.033) & \redm 94.70 & \redm 90.46 \\[1ex]
+		\multicolumn{4}{c}{(c) $X \sim \mathcal{U}(0, 1)$, $\sigma^2(X) = 0.50^2$} \\[1ex]
+		50   & [0, 0.157) & 	  29.02 & 	  1211.54 \\
+		100  & [0, 0.137) & \redm 21.12 & 	  1713.05 \\
+		250  & [0, 0.114) & \redm 43.81 & 	   160.39 \\
+		500  & [0, 0.099) & \redm 55.65 & \redm 19.68 \\
+		1000 & [0, 0.086) & \redm 63.34 & \redm 51.37 \\
+		2500 & [0, 0.072) & \redm 73.52 & \redm 64.01 \\
+		5000 & [0, 0.063) & \redm 81.22 & \redm 76.20 \\[1ex]
+		\multicolumn{4}{c}{(d) $X \sim f_{\ast}$, $\sigma^2(X) = 0.25^2$} \\[1ex]
+		50   & [0, 0.114) & 	1710.42 & 	   768.81 \\
+		100  & [0, 0.099) &    78059.16 & 	  5265.00 \\
+		250  & [0, 0.082) & \redm 47.65 & 	  1194.28 \\
+		500  & [0, 0.072) & \redm 59.66 & 	   569.77 \\
+		1000 & [0, 0.062) & \redm 66.92 & 	   169.63 \\
+		2500 & [0, 0.052) & \redm 75.70 & \redm 43.91 \\
+		5000 & [0, 0.045) & \redm 81.78 & \redm 69.66 \\
+		\bottomrule
+	\end{tabular}	
+\end{table}
+
+The reason for the better boundary performance of the LL estimator for all sample sizes except $n = 50$ is its first-order unbiasedness.
+Since over the boundary regions the function $m_1$ can be well approximated by a linear function (see Figure~\ref{fig:ll_boundary}),
+LL regression accomplishes a substantial bias reduction compared to the NW estimator.
+However, the procedure is more variable than Nadaraya-Watson.
+For $n = 50$ we only have on average six (noisy) observations in the boundary region.
+Then, fitting locally a regression line is unstable and the variability dominates.
+In fact, if we decrease the error variance while keeping the bandwidth fixed, at some point the bias reduction results in a smaller error for $n = 50$.
+It can also be shown mathematically that the asymptotic variance of the LL estimator tends to become inflated near the boundary \parencite[Section 5.5]{Wand_1995}.
+The results for the boundary-adjusted NW estimator illustrate the fact that the boundary correction is only asymptotically valid (as discussed in Section~\ref{sec:boundary_kernels}).
+A sufficient amount of data ($n = 1000$) is necessary until the bias modification works in the considered simulation case.
+The more data is effectively available, the less will the results between the LL estimator and the adjusted NW estimator differ
+because we know from the theoretical treatment that both possess $\bigO(h^2)$ boundary bias.
+Asymptotically the methods perform equivalently.
+Lastly, to investigate the MISE increase for $n = 250$ when using boundary kernels,
+we modified the noise level while everything else remained unchanged.
+Only for a very small error variance close to the degenerate case, we observed a monotonically decreasing error.
+Further investigation is necessary to understand this finding, also because the same behavior occurs for other set-ups. 
+
+Next, starting from the baseline case we alter the variance of the homoscedastic error.
+Table~\ref{tab:simulation_results_m_1}b reports the results for a smaller variance of $\sigma^2 = 0.1^2$ and Table~\ref{tab:simulation_results_m_1}c for $\sigma^2 = 0.5^2$, a variance four times the initial value $0.25^2$.
+We might infer from the discussion of the baseline case that, for instance,
+LL regression will achieve better (worse) results for a higher (lower) signal-to-noise ratio.
+However, a change in the (conditional) error variance leads to a new bias-variance trade-off, and thus to different optimal bandwidths.
+According to Theorem~\ref{theorem_2} a decrease (increase) of $\sigma^2$ results in smaller (larger) bandwidths.
+Indeed, looking at Table~\ref{tab:simulation_results_m_1}b we notice a larger MISE over the boundary region for the LL estimator also for $n = 100$.
+But for a sample size of $n = 250$ and beyond, the MISE reduction is stronger than in Table~\ref{tab:simulation_results_m_1}a
+(e.g.\ 17 percentage points for $n = 250$).
+A similar behavior is obtained for the boundary-adjusted NW estimator.
+
+The reason for the increased MISE of both approaches relative to the NW estimator for smaller samples is the reduced effective sample size.
+Even though observations falling into the boundary region are now on average more informative,
+the lower number causing a higher estimation variability gives a relative advantage to NW.
+If more data is effectively available, we see the dominating bias reduction effect.
+Overall, Table~\ref{tab:simulation_results_m_1}b shows the same patterns as before (for the same reasons as before).
+LL regression exhibits for all sample sizes better boundary behavior than the adjusted NW estimator,
+the latter requires more data to achieve a MISE reduction, but the difference between both methods vanishes asymptotically.
+
+For the increased error variance $\sigma^2 = 0.5^2$ we obtain opposite results to the lowest variance case,
+which is in line with the explanation just given.
+Compared to the baseline case bandwidths are now 32\% larger.
+The MISE of LL regression for $n = 50$ is only 29\% larger, and the explicit boundary adjustment is already advantageous for 500 observations.
+But the magnitude of the reductions is smaller compared to the two higher signal-to-noise cases.
+For example, the reduction of the LL estimator for $\sigma^2 = 0.5^2$ and $n = 5000$ is with 81\% about the same as for $\sigma^2 = 0.1^2$ and only $n = 250$.
+Estimation near the boundary is based on more observations, but these are less reliable due to a four-time higher error variance.
+
+An interesting question is how the finite sample properties of the estimators depend on the design,
+i.e.\ how the observations of the regressor are distributed.
+To analyze the dependence, we again consider the baseline case and modify the design from being uniform to being clustered.
+Compared to the uniform design the clustered design density $f_{\ast}$ from Table~\ref{tab:simulation_overview} gradually shifts half of the probability mass to the center (see Figure~\ref{fig:clustered_design_density}).
+Hence, in practice the closer a region is located to the boundaries, the fewer observations will occur.
+We point out that the non-uniform design induces a different bandwidth for the NW and the LL estimator (the latter ones are 4\% larger).
+The design switch has essentially no effect on the size of the boundary region.
+When comparing the MISE changes to those for the uniform design,
+LL regression and overall also adjusted NW perform inferior.
+For $n = 100$ the LL estimator shows a strong increase in the MISE, yet from a sample size of $n = 250$ reductions are achieved.
+For the adjusted NW estimator instead $n = 2500$ observations are needed to get an improvement.
+
+The worse boundary behavior (and the jump at $n = 100$) for the clustered design appears due to fewer observations near the boundary compared to the uniformly distributed regressor.
+Moreover, the results indicate the fact that LL regression is design-adaptive while the adjusted NW method is not.
+Boundary kernels are adaptive to the boundary but not to non-uniform designs near the boundary.
+See \textcite{Hastie_1993} for a graphical illustration.
+
+After discussing the results for $m_1$, we now examine the case of a linear conditional expectation function with a bump in the interior.
+Figure~\ref{fig:m_2} displays the graph of $m_2$ and the simulation results are given in Table~\ref{tab:simulation_results_m_2}.
+First, we notice the considerably smaller bandwidths compared to before.
+Even for the smallest sample size $n = 50$, the bandwidth is already $h = 0.066$.
+Second, although over the boundary regions the function $m_2$ is exactly linear,
+neither boundary correction method leads to improved estimation, also not for the largest sample size.
+
+The small bandwidths result from the peak in the interior of the observation interval (avoidance of excessive smoothing bias).
+Then, LL regression has relatively high MISE values despite having zero estimation bias.
+The functional form of $m_2$ was chosen to illustrate two points.
+The NW estimator has an advantage in contexts where estimation variance is the decisive component,
+i.e.\ when the effective sample size is small or estimation bias is low because the regression function is rather flat.
+And, when evaluating boundary behavior it is important to choose a suitable research design.
+If the smoothing parameter is selected globally, the boundary analysis may be dominated by an interior feature like a peak in our example.
+To focus on boundary estimation without interference, we could either truncate the interval [0, 1] to exclude the peak
+or try to incorporate local bandwidth choice (e.g.\ \cite{Fan_Gijbels_1992}).    
+
+\begin{table}
+	\centering
+	\captionabove{Simulated percentage changes in the boundary MISE.
+				  The regression function is $m_2$ (case five from Table~\ref{tab:simulation_overview}).}
+	\label{tab:simulation_results_m_2}
+	\begin{tabular}{r r r r}
+		\toprule
+		\multirow{2}[1]{*}{$n$} & \multirow{2}[1]{*}{Boundary region: $[0, h_{\text{opt}}^{\NW}(n))$} & \multicolumn{2}{c}{Change in MISE to NW [\%]} \\
+		\cmidrule(lr){3-4}
+		& & Local linear & NW boundary-adjusted \\
+		\midrule
+		50   & [0, 0.066) &   15953.93 &   989.86 \\
+		100  & [0, 0.057) & 1040283.95 &   724.15 \\
+		250  & [0, 0.048) & 	 86.23 & 17438.86 \\
+		500  & [0, 0.042) & 	 65.39 &   293.78 \\
+		1000 & [0, 0.036) & 	 54.40 &   114.32 \\
+		2500 & [0, 0.030) & 	 42.89 &    74.65 \\
+		5000 & [0, 0.026) & 	 33.27 &    66.51 \\
+		\bottomrule
+	\end{tabular}	
+\end{table}
+
+In the final simulation case the regression function $m_3$ is similar to $m_2$, but the peak is shifted to the left boundary (Figure~\ref{fig:m_3}).
+Consequently, as can be seen from Table~\ref{tab:simulation_results_m_3} the boundary regions are somewhat larger.
+Qualitatively the results are now again similar to the ones for the function $m_1$.
+For the smallest (effective) sample sizes LL regression is worse, but then quickly improves on NW in a constant manner
+(the lower reduction for $n = 1000$ is an artifact of the fewer Monte-Carlo repetitions).
+Regarding the adjusted NW estimator it takes longer (until $n = 1000$) to pay off.
+When the boundary region contains at least a few observations ($nh = 250 \cdot 0.055 \approx 14$) the bias reduction achieved by LL regression takes over.
+Due to the strong negative slope of $m_3$ in the boundary regions, NW has substantial downward bias.
+In contrast, by modeling slopes LL regression is able to capture this structured boundary.
+The asymptotic adjustment of boundary kernels instead is visible not until 1000 observations.
+
+\begin{table}
+	\centering
+	\captionabove{Simulated percentage changes in the boundary MISE.
+				  The regression function is $m_3$ (case six from Table~\ref{tab:simulation_overview}).}
+	\label{tab:simulation_results_m_3}
+	\begin{tabular}{r r r r}
+		\toprule
+		\multirow{2}[1]{*}{$n$} & \multirow{2}[1]{*}{Boundary region: $[0, h_{\text{opt}}^{\NW}(n))$} & \multicolumn{2}{c}{Change in MISE to NW [\%]} \\
+		\cmidrule(lr){3-4}
+		& & Local linear & NW boundary-adjusted \\
+		\midrule
+		50   & [0, 0.076) & 	 999.26 & 	 76196.73 \\
+		100  & [0, 0.066) &    41922.93 & 	  5420.96 \\
+		250  & [0, 0.055) & \redm 63.17 & 	   356.63 \\
+		500  & [0, 0.048) & \redm 65.57 & 	   343.59 \\
+		1000 & [0, 0.042) & \redm 64.64 & \redm 39.99 \\
+		2500 & [0, 0.035) & \redm 66.81 & \redm 56.64 \\
+		5000 & [0, 0.030) & \redm 69.30 & \redm 63.45 \\
+		\bottomrule
+	\end{tabular}	
+\end{table}
+
+We briefly summarize the simulation findings.
+The LL estimator performs better than the adjusted NW estimator, particularly for small sample sizes and non-uniform designs.
+Only for samples as large as 5000 or more the methods are equivalent.
+When effective sample sizes are small and also when the regression function near the boundary is rather flat (estimation bias is negligible) NW is favorable.
+When there is some structure, i.e.\ curvature, near the boundary and the effective sample size is roughly not smaller than $nh = 15$, then the LL estimator is beneficial.

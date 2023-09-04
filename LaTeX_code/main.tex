@@ -1,0 +1,161 @@
+% TeX main file
+
+% Research Module in Econometrics & Statistics 
+% Prof. Dr. Liebl & Dr. Christopher Walsh
+% Winter 2021/22, M.Sc. Economics, Bonn University
+% Xingyu Tao, Xuan Li, Sven Jacobs
+
+                                                                                                                                                                              
+\documentclass[a4paper, 12pt, bibliography=totoc]{scrartcl}   
+
+% Packages
+
+% General  
+\usepackage{lmodern}
+\usepackage{csquotes}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{enumitem}
+\usepackage{relsize}
+\usepackage[section]{placeins}
+
+% Spacing 
+\usepackage{geometry}
+	\geometry{a4paper, top=2cm, left=2cm, right=2cm, bottom=2cm, footskip=1.25cm}	
+\usepackage[onehalfspacing]{setspace}
+\setcapindent{0pt} 
+
+% Plotting
+\usepackage{graphicx}
+	\graphicspath{{plots/}}
+\usepackage{pgfplots}
+	\pgfplotsset{compat=1.18}
+\usepackage{subcaption}
+
+% Tables
+\usepackage{booktabs}
+\usepackage{multirow}
+
+% Math
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{mathtools}
+	\mathtoolsset{showonlyrefs}
+
+% Settings for PDF
+\usepackage{hyperref}
+	\hypersetup{
+	pdftitle={Boundary effects in kernel regression},
+	pdfauthor={Xingyu Tao, Xuan Li, Sven Jacobs},
+	pdfsubject={Nonparametric regression},    
+	pdfkeywords={Paper; Research Module in Econometrics \& Statistics, Prof. Dr. Liebl \& Dr. Christopher Walsh; Winter 2021/22, M.Sc. Economics, Bonn University}, 
+	hidelinks}
+
+% Bibliography 
+\usepackage[backend=biber, style=authoryear, maxcitenames=2, uniquelist=false]{biblatex} 
+	\addbibresource{rm_li-tao-jacobs.bib}
+\renewbibmacro{in:}{
+	\ifentrytype{article}{}{\printtext{\bibstring{in}\intitlepunct}}}	
+\renewbibmacro{volume+number+eid}{
+	\printfield{volume}
+	\setunit{\addnbthinspace}
+	\printfield{number}
+	\setunit{\addcomma\space}	
+	\printfield{eid}}
+\DeclareFieldFormat[article]{number}{\mkbibparens{#1}}
+\DeclareFieldFormat{url}{\url{#1}}
+\renewcommand{\subtitlepunct}{\addcolon\space}
+\renewcommand{\nameyeardelim}{\addcomma\space}
+
+% Math operators
+\DeclareMathOperator{\E}{E}
+\DeclareMathOperator{\Bias}{Bias}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\ABias}{ABias}
+\DeclareMathOperator{\AVar}{AVar}
+\DeclareMathOperator{\AMSE}{AMSE}
+\DeclareMathOperator{\ISE}{ISE}
+\DeclareMathOperator{\MISE}{MISE}
+\DeclareMathOperator{\AMISE}{AMISE}
+\DeclareMathOperator{\e}{e}
+\DeclareMathOperator{\Eff}{Eff}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\bigO}{\mathcal{O}}
+\DeclareMathOperator{\littleO}{\scriptstyle \mathcal{O}}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\CV}{CV}
+\DeclareMathOperator{\diag}{diag} 
+
+% Math environments
+\newtheorem{theorem}{Theorem}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+% Own commands
+\newcommand{\diff}{\mathop{}\!\textup{d}}
+\newcommand{\NW}{\textup{\tiny NW}}
+\newcommand{\LL}{\textup{\tiny LL}}
+\newcommand{\LP}{\text{\tiny LP}}
+\newcommand{\redm}{\textcolor{red}{$-$}}
+
+% Own functions
+\pgfmathdeclarefunction{epa_right}{2}{%
+	\pgfmathparse{6*(1+#1)*(#2-#1)*(1/(1+#2)^3)*(1 + 5*((1-#2)/(1+#2))^2 + 10*((1-#2)/(1+#2)^2)*#1)*(#1<#2)}%
+}
+
+\begin{document} % \pagecolor{red} 
+
+\newgeometry{top=2cm, left=2cm, right=2cm, bottom=2cm}
+
+\pdfbookmark[1]{Title Page}{Title Page}
+\begin{titlepage}
+	\topskip0pt
+	\vspace*{\fill}
+	\begin{center}
+		\LARGE
+		\textsf{\textbf{Boundary effects in kernel regression}}  
+		\vspace{2.5cm}
+	 
+		\large	
+		Research Module in Econometrics \& Statistics \\  
+		Prof.\ Dr.\ Liebl \& Dr.\ Christopher Walsh \\  
+		Winter 2021/22, M.Sc.\ Economics, Bonn University
+		\vspace{7.5cm}  
+		
+		Submitted in February 2022 by: \\
+		Xingyu Tao, Xuan Li, Sven Jacobs  
+	\end{center}
+	\vspace*{\fill}
+\end{titlepage}
+
+\restoregeometry 
+	
+\newpage
+
+\pagenumbering{Roman}
+\setcounter{page}{2}
+
+\pdfbookmark[1]{Contents}{Contents}
+\tableofcontents  
+
+\newpage
+
+\pagenumbering{arabic}  
+
+\input{introduction.tex}
+\input{local_linear_regression.tex}
+\input{boundary_kernels.tex}
+\input{simulation.tex}
+\input{application.tex}
+\input{conclusion.tex}
+
+\clearpage
+
+\input{appendix.tex}
+
+\clearpage
+ 
+\printbibliography  
+
+\end{document}

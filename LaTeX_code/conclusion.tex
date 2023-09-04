@@ -1,0 +1,43 @@
+% TeX file "conclusion"
+
+% Research Module in Econometrics & Statistics 
+% Prof. Dr. Liebl & Dr. Christopher Walsh
+% Winter 2021/22, M.Sc. Economics, Bonn University
+% Xingyu Tao, Xuan Li, Sven Jacobs
+
+
+\section{Conclusion} \label{sec:conclusion}
+
+The paper discussed boundary effects in kernel regression.
+We have seen that the Nadaraya-Watson estimator in general suffers from poor boundary behavior.
+This is visually disturbing,
+but also manifests in a larger order of the bias and thus a slower rate of convergence compared to the interior.
+We focused on two methods to overcome the boundary problem.
+Local linear regression preserves the order of the interior and was shown, theoretically and graphically,
+to correct the bias exactly to first order.
+The second approach, applying special boundary kernels when estimating in boundary regions,
+instead provides an asymptotic bias adjustment.
+
+A Monte-Carlo simulation study showed that the local linear estimator performs better than the boundary-adjusted Nadaraya-Watson estimator,
+particularly for small sample sizes and non-uniform designs.
+Moreover, the study revealed the relative advantage of Nadaraya-Watson for boundary estimation when estimation variability is the dominant component,
+i.e.\ when the effective sample size is small or the regression function is rather flat.
+A real-data application of the methods to determine the size of a causal effect in the RDD illustrated the need for boundary correction in practice,
+as boundary effects can substantially bias estimates and inference.
+
+Overall, in econometrics boundaries are often of special interest and the potential severe bias of Nadaraya-Watson then requires an adjustment.
+Boundary kernels achieve an asymptotic correction,
+but are rather complicated and tedious to implement in practice.
+Local linear regression, in contrast, is a simple and intuitive method which automatically adapts to estimation at boundaries.
+Besides, it has the favorable design-adaptivity property.
+Therefore, we recommend local linear regression.
+
+We restricted our analysis to the Nadaraya-Watson and the local linear estimator as two special cases of the local polynomial estimator to obtain the key insights.
+Higher-order polynomials can further reduce the bias,
+but at the expense of increased variability.
+In practical applications often the local linear estimator is chosen.
+An interesting extension of our research is to investigate boundary effects in higher dimensions.
+Especially because the boundary region is larger and boundary effects may occur over much of the domain.
+In fact, the fraction of points close to the boundary increases to one as the dimension grows \parencite[200]{Hastie_2009}.
+Another possible extension is the estimation of curves that depend on the regression function,
+e.g.\ derivatives.
